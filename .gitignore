@@ -1,0 +1,81 @@
+# CMake build directories and generated files
+/build/
+/build-*/
+/cmake-build-*/
+/out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
+/Testing/
+/_CPack_Packages/
+_deps/
+CMakeUserPresets.json
+compile_commands.json
+
+# Compiler and linker output
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.out
+*.pdb
+*.ilk
+*.pch
+*.gch
+*.dSYM/
+
+# Coverage and profiling output
+*.gcda
+*.gcno
+*.gcov
+*.profraw
+*.profdata
+/coverage/
+/gmon.out
+
+# Local editor state (keep shareable VS Code configuration)
+/.vscode/*
+!/.vscode/settings.json
+!/.vscode/extensions.json
+!/.vscode/tasks.json
+!/.vscode/launch.json
+!/.vscode/c_cpp_properties.json
+/.idea/
+/.vs/
+.cache/
+*.swp
+*.swo
+*~
+
+# Runtime output and local configuration
+/logs/
+*.log
+*.pid
+/core
+/core.[0-9]*
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+# Private credentials
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
