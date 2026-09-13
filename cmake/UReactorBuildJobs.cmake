@@ -1,0 +1,15 @@
+include_guard(GLOBAL)
+
+# 配置阶段只计算建议值；真正的构建并行度由 --parallel 控制。
+cmake_host_system_information(RESULT _ureactor_cpu QUERY NUMBER_OF_LOGICAL_CORES)
+cmake_host_system_information(RESULT _ureactor_memory QUERY AVAILABLE_PHYSICAL_MEMORY)
+math(EXPR _ureactor_jobs "${_ureactor_cpu} * 3 / 2")
+math(EXPR _ureactor_memory_jobs "${_ureactor_memory} / 1536")
+if(_ureactor_jobs GREATER _ureactor_memory_jobs)
+    set(_ureactor_jobs "${_ureactor_memory_jobs}")
+endif()
+if(_ureactor_jobs LESS 1)
+    set(_ureactor_jobs 1)
+endif()
+set(UREACTOR_BUILD_JOBS "${_ureactor_jobs}" CACHE STRING "Suggested parallel build jobs")
+message(STATUS "Suggested build: cmake --build ${PROJECT_BINARY_DIR} --parallel ${UREACTOR_BUILD_JOBS}")
