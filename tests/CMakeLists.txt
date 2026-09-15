@@ -13,4 +13,4 @@ foreach(TEST_SOURCE IN LISTS UREACTOR_TEST_SOURCES)
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endforeach()
 
-
+add_subdirectory(inner_tests)
