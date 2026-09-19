@@ -5,7 +5,7 @@
 #include<cstdint>
 #include<string_view>
 
-#include<logger/loglevel.h>
+#include<ureactor/logger/loglevel.h>
 #include<ureactor/macros.h>
 
 namespace ureactor::detail{
