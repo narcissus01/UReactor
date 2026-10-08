@@ -15,7 +15,15 @@ target_include_directories(ureactor
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
-target_link_libraries(ureactor PUBLIC ureactor_options Threads::Threads)
+target_link_libraries(ureactor PUBLIC ureactor_options Threads::Threads yaml-cpp::yaml-cpp)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # Ubuntu: sudo apt install libdw-dev pkg-config
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LIBDW REQUIRED IMPORTED_TARGET libdw)
+    target_link_libraries(ureactor PRIVATE PkgConfig::LIBDW)
+elseif(WIN32)
+    target_link_libraries(ureactor PRIVATE dbghelp)
+endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(ureactor PRIVATE -Werror)
 elseif(MSVC)

@@ -8,7 +8,7 @@ namespace ureactor{
 namespace{
 
 // Unicode码点的最大值，合法范围是0x0~0x10FFFF,超过范围非法
-constexpr u32 MAX_UNICODE_CODE_POINT = 0x10FFFF; 
+constexpr u32 MAX_UNICODE_CODE_POINT = 0x10FFFF;
 constexpr u32 HIGH_SURROGATE_FIRST = 0xD800;
 constexpr u32 HIGH_SURROGATE_LAST = 0xDBFF;
 constexpr u32 LOW_SURROGATE_FIRST = 0xDC00;
@@ -194,5 +194,50 @@ std::wstring StringUtils::StringToWstring(std::string_view text) noexcept
     }
 }
 
+std::string StringUtils::Trim(const std::string& text, std::string_view delimiters)
+{
+    return std::string(Trim(std::string_view(text), delimiters));
+}
+
+std::string_view StringUtils::Trim(std::string_view text, std::string_view delimiters) noexcept
+{
+    const std::size_t begin = text.find_first_not_of(delimiters);
+    if(begin == std::string_view::npos)
+    {
+        return {};
+    }
+    const std::size_t end = text.find_last_not_of(delimiters);
+    return text.substr(begin, end - begin + 1);
+}
+
+std::string StringUtils::TrimLeft(const std::string& text, std::string_view delimiters)
+{
+    return std::string(TrimLeft(std::string_view(text), delimiters));
+}
+
+std::string_view StringUtils::TrimLeft(std::string_view text, std::string_view delimiters) noexcept
+{
+    const std::size_t begin = text.find_first_not_of(delimiters);
+    if(begin == std::string_view::npos)
+    {
+        return {};
+    }
+    return text.substr(begin);
+}
+
+std::string StringUtils::TrimRight(const std::string& text, std::string_view delimiters)
+{
+    return std::string(TrimRight(std::string_view(text), delimiters));
+}
+
+std::string_view StringUtils::TrimRight(std::string_view text, std::string_view delimiters) noexcept
+{
+    const std::size_t end = text.find_last_not_of(delimiters);
+    if(end == std::string_view::npos)
+    {
+        return {};
+    }
+    return text.substr(0, end + 1);
+}
 
 }

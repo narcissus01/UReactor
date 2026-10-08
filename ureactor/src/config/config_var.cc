@@ -1,0 +1,101 @@
+#include<atomic>
+#include<stdexcept>
+#include<string>
+#include<string_view>
+
+#include<ureactor/config/config_var.h>
+
+namespace ureactor{
+
+namespace detail{
+
+namespace{
+constexpr std::string_view CONFIG_NAME_CHARSET = "abcdefghijklmnopqrstuvwxyz._0123456789";
+
+} //namespace
+
+ListenerId NextListenerId() noexcept
+{
+    static std::atomic<ListenerId> next_id{1};
+    return next_id.fetch_add(1, std::memory_order_relaxed);
+}
+
+std::string NormalizeConfigName(std::string name)
+{
+    for(char& c :name)
+    {
+        if(c >= 'A' && c <= 'Z')
+        {
+            c = static_cast<char>(c - 'A' + 'a');
+        }
+    }
+    return name;
+}
+
+bool IsValidConfigName(std::string_view name) noexcept
+{
+    return !name.empty() && name.find_first_not_of(CONFIG_NAME_CHARSET) == std::string_view::npos;
+}
+
+} //namespace detail
+
+ConfigVarBase::ConfigVarBase(std::string name, std::string description)
+    : m_name(detail::NormalizeConfigName(std::move(name)))
+    , m_description(std::move(description))
+{
+    if(!detail::IsValidConfigName(m_name))
+    {
+        detail::ReportConfigError("ConfigVarBase::ConfigVarBase", m_name, "ConfigVarBase", "配置包含非法字符");
+        throw std::invalid_argument("ureactor : invalid config name :" + m_name);
+    }
+}
+
+ConfigVarBase::~ConfigVarBase() = default;
+
+std::string ConfigVarBase::toString() const
+{
+    try
+    {
+        const YAML::Node node = toNode();
+        if(node.IsScalar())
+        {
+            return node.Scalar();
+        }
+        YAML::Emitter emitter;
+        emitter << node;
+        if(!emitter.good())
+        {
+            detail::ReportConfigError("ConfigVarBase::toString", m_name, getTypeName(), emitter.GetLastError());
+            return {};
+        }
+        return emitter.c_str();
+    }
+    catch(const std::exception& e)
+    {
+        detail::ReportConfigError("ConfigVarBase::toString", m_name, getTypeName(), e.what());
+    }
+    catch(...)
+    {
+        detail::ReportConfigError("ConfigVarBase::toString", m_name, getTypeName(), "未知异常");
+    }
+    return {};
+}
+
+bool ConfigVarBase::fromString(std::string_view value)
+{
+    try
+    {
+        return fromNode(YAML::Load(std::string(value)));
+    }
+    catch(const std::exception& e)
+    {
+        detail::ReportConfigError("ConfigVarBase::fromString", m_name, getTypeName(), e.what());
+    }
+    catch(...)
+    {
+        detail::ReportConfigError("ConfigVarBase::fromString", m_name, getTypeName(), "未知异常");
+    }
+    return false;
+}
+
+}

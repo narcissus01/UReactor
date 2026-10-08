@@ -13,3 +13,27 @@ target_link_libraries(test_formatter PRIVATE ureactor Threads::Threads)
 target_include_directories(test_formatter PRIVATE "${PROJECT_SOURCE_DIR}/ureactor/src")
 add_test(NAME test_formatter COMMAND test_formatter)
 set_tests_properties(test_formatter PROPERTIES ENVIRONMENT "TZ=UTC")
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_executable(test_config test_config.cpp)
+    target_link_libraries(test_config PRIVATE UReactor::ureactor)
+    add_test(NAME test_config COMMAND test_config)
+    set_tests_properties(test_config PROPERTIES TIMEOUT 30)
+endif()
+
+add_executable(test_backtrace test_backtrace.cpp)
+target_link_libraries(test_backtrace PRIVATE UReactor::ureactor)
+add_test(NAME test_backtrace COMMAND test_backtrace)
+
+foreach(mode IN ITEMS debug release)
+    add_executable(test_assertion_${mode} test_assertion_diagnostics.cpp)
+    target_link_libraries(test_assertion_${mode} PRIVATE UReactor::ureactor)
+    if(mode STREQUAL "release")
+        target_compile_definitions(test_assertion_${mode} PRIVATE UREACTOR_TEST_RELEASE)
+    endif()
+    add_test(NAME test_assertion_${mode}
+        COMMAND "${CMAKE_COMMAND}"
+            "-DPROGRAM=$<TARGET_FILE:test_assertion_${mode}>"
+            "-DRELEASE_MODE=$<STREQUAL:${mode},release>"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/check_assertion_output.cmake")
+endforeach()

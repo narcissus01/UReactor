@@ -2,16 +2,62 @@
 #define UREACTOR_INCLUDE_UREACTOR_MACROS_H
 
 #include <cassert>
-#include <cstdint>
-#include <iostream>
+#include <cstdio>
+#include <sstream>
+
+#include<ureactor/types.h>
+#include<ureactor/utils/system_utils.h>
+
+namespace ureactor::detail {
+
+// 不依赖 Logger：日志器自身也使用断言，调用它会导致递归或重入锁。
+// 每个线程独立防重入；嵌套失败只打印基本信息，不再格式化消息或解析堆栈。
+inline thread_local bool reporting_assertion = false;
+
+template<class WriteMessage>
+void ReportAssertionFailure(const char* file, int line, const char* expression,
+                            WriteMessage&& write_message) noexcept
+{
+    std::fprintf(stderr, "file: %s, line: %d, Assertion failed: %s\n",
+                 file, line, expression);
+    if (reporting_assertion) {
+        std::fputs("[recursive assertion: details omitted]\n", stderr);
+        std::fflush(stderr);
+        return;
+    }
+    reporting_assertion = true;
+    struct Reset {
+        ~Reset() { reporting_assertion = false; }
+    } reset;
+
+    // 消息表达式也在 try 内求值，防止分配失败或用户 operator<< 抛出异常。
+    try {
+        std::ostringstream message;
+        write_message(message);
+        const auto text = message.str();
+        std::fputs("Message: ", stderr);
+        std::fwrite(text.data(), 1, text.size(), stderr);
+        std::fputc('\n', stderr);
+    } catch (...) {
+        std::fputs("Message: [unavailable: formatting threw]\n", stderr);
+    }
+    try {
+        const auto trace = GetBacktrace();
+        std::fputs("Stacktrace:\n", stderr);
+        std::fwrite(trace.data(), 1, trace.size(), stderr);
+    } catch (...) {
+        std::fputs("Stacktrace: [unavailable: capture threw]\n", stderr);
+    }
+    std::fflush(stderr);
+}
+} // namespace ureactor::detail
 
 // Debug: print and abort. NDEBUG: print and let the caller handle failure.
 // expr_text is a string, so the original condition is never evaluated here.
 #define UREACTOR_DETAIL_FAILURE(expr_text, msg) \
     do { \
-        std::cerr << "file: " << __FILE__ << ", line: " << __LINE__ \
-                  << ", Assertion failed: " << (expr_text) \
-                  << "\nMessage: " << (msg) << '\n'; \
+        ::ureactor::detail::ReportAssertionFailure(__FILE__, __LINE__, (expr_text), \
+            [&](std::ostream& ureactor_message_stream) { ureactor_message_stream << (msg); }); \
         assert(false && "UReactor assertion failed; see diagnostic above"); \
     } while (0)
 
@@ -66,22 +112,6 @@
         break; \
     } else (void)0
 
-#define INVALID64 (~0ULL)
-#define INVALID32 (0xFFFFFFFFU)
-#define INVALID16 (0xFFFFU)
-#define INVALID8 (0xFFU)
-#define MAX_U8 (0xFFU)
-#define MAX_U16 (0xFFFFU)
-#define MAX_U32 (0xFFFFFFFFU)
-#define MAX_U64 (~0ULL)
 
-using u8 = std::uint8_t;
-using u16 = std::uint16_t;
-using u32 = std::uint32_t;
-using u64 = std::uint64_t;
-using s8 = std::int8_t;
-using s16 = std::int16_t;
-using s32 = std::int32_t;
-using s64 = std::int64_t;
 
 #endif

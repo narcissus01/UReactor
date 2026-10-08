@@ -8,7 +8,7 @@
 #include<ureactor/logger/appender.h>
 #include<ureactor/logger/loglevel.h>
 #include<ureactor/logger/logger.h>
-#include<ureactor/macros.h>
+#include<ureactor/types.h>
 
 namespace ureactor::detail{
 
@@ -26,7 +26,7 @@ public:
 
 private:
     struct Impl;
-    
+
     static constexpr std::size_t LOG_LINE_IMPL_SIZE = 1024;
     alignas(std::max_align_t) std::byte m_implStorage[LOG_LINE_IMPL_SIZE];
 
