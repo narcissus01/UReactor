@@ -21,3 +21,8 @@ Release 中的内联、优化和缺失调试符号可能减少可见堆栈信息
 
 yaml-cpp 是配置系统的必需依赖，普通构建自动编译；其他第三方库默认不参与构建。分支下载、CMake 接入与集成测试命令见
 [第三方库与 CMake 学习手册](docs/第三方库与CMake学习手册.md)。
+
+Boost.Context 1.92.0 已精简嵌入并自动构建，详见
+[来源、依赖与测试说明](third_party/boost_context/README.md)。
+上下文切换测试：`cmake --build build --target test_context --parallel 4`，
+然后执行 `ctest --test-dir build -R '^test_context$' --output-on-failure`。

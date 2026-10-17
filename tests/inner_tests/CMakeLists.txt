@@ -14,6 +14,16 @@ target_include_directories(test_formatter PRIVATE "${PROJECT_SOURCE_DIR}/ureacto
 add_test(NAME test_formatter COMMAND test_formatter)
 set_tests_properties(test_formatter PROPERTIES ENVIRONMENT "TZ=UTC")
 
+add_executable(test_context test_context.cpp)
+target_link_libraries(test_context PRIVATE UReactor::ureactor)
+add_test(NAME test_context COMMAND test_context)
+set_tests_properties(test_context PROPERTIES TIMEOUT 20)
+
+add_executable(test_fiber test_fiber.cpp)
+target_link_libraries(test_fiber PRIVATE UReactor::ureactor)
+add_test(NAME test_fiber COMMAND test_fiber)
+set_tests_properties(test_fiber PROPERTIES TIMEOUT 30)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_executable(test_config test_config.cpp)
     target_link_libraries(test_config PRIVATE UReactor::ureactor)

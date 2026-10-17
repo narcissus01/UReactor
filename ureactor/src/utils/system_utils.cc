@@ -1,3 +1,4 @@
+#include <ureactor/fiber.h>
 #include<algorithm>
 #include<cstdint>
 #include<cstdlib>
@@ -37,7 +38,7 @@ std::chrono::steady_clock::duration GetElapsedTime() noexcept
 
 u64 GetFiberId() noexcept
 {
-    return 0;
+    return Fiber::GetFiberId();
 }
 
 namespace{
